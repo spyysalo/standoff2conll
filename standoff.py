@@ -8,7 +8,7 @@ from common import FormatError
 TEXTBOUND_LINE_RE = re.compile(r'^T\d+\t')
 
 KEEP_LONGER = 'keep-longer'
-KEEP_SHORTER = 'keep-shorter',
+KEEP_SHORTER = 'keep-shorter'
 OVERLAP_RULES = [KEEP_LONGER, KEEP_SHORTER]
 
 class Textbound(object):

@@ -14,6 +14,7 @@ from asciify import document_to_ascii
 from unicode2ascii import log_missing_ascii_mappings
 from tagsequence import TAGSETS, IO_TAGSET, IOBES_TAGSET, DEFAULT_TAGSET
 from tagsequence import BIO_to_IO, BIO_to_IOBES
+from standoff import OVERLAP_RULES
 
 def argparser():
     import argparse
@@ -24,6 +25,12 @@ def argparser():
                     help='replace all annotation types with TYPE')
     ap.add_argument('-a', '--asciify', default=None, action='store_true',
                     help='map input to ASCII')
+    ap.add_argument('-n', '--no-sentence-split', default=False,
+                    action='store_true',
+                    help='do not perform sentence splitting')
+    ap.add_argument('-o', '--overlap-rule', choices=OVERLAP_RULES,
+                    default=OVERLAP_RULES[0],
+                    help='rule to apply to resolve overlapping annotations')
     ap.add_argument('-s', '--tagset', choices=TAGSETS, default=None,
                     help='tagset (default %s)' % DEFAULT_TAGSET)
     return ap
@@ -34,11 +41,15 @@ def is_standoff_file(fn):
 def txt_for_ann(filename):
     return os.path.splitext(filename)[0]+'.txt'
 
-def read_ann(filename, encoding='utf-8'):
+def read_ann(filename, options, encoding='utf-8'):
     txtfilename = txt_for_ann(filename)
     with codecs.open(txtfilename, 'rU', encoding=encoding) as t_in:
         with codecs.open(filename, 'rU', encoding=encoding) as a_in:
-            return Document.from_standoff(t_in.read(), a_in.read())
+            return Document.from_standoff(
+                t_in.read(), a_in.read(),
+                sentence_split = not options.no_sentence_split,
+                overlap_rule = options.overlap_rule
+            )
 
 def replace_types_with(document, type_):
     from tagsequence import OUT_TAG, parse_tag, make_tag
@@ -68,7 +79,7 @@ def convert_directory(directory, options):
         return
 
     for fn in sorted(files):
-        document = read_ann(fn)
+        document = read_ann(fn, options)
         if options.singletype:
             replace_types_with(document, options.singletype)
         if options.tagset:

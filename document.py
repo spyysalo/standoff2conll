@@ -328,7 +328,7 @@ class Document(object):
 
         sentences = []
         offset = 0
-        for s in text_to_sentences(text):
+        for s in text_to_sentences(text, sentence_split):
             sentences.append(Sentence.from_text(s, offset))
             offset += len(s)
 
@@ -370,7 +370,8 @@ class Document(object):
         return cls(text, sentences)
 
     @classmethod
-    def from_standoff(cls, text, annotations, sentence_split=True):
+    def from_standoff(cls, text, annotations, sentence_split=True,
+                      overlap_rule=None):
         """Return Document given text and standoff annotations."""
 
         # first create a document from the text without annotations
@@ -381,7 +382,7 @@ class Document(object):
 
         textbounds = parse_textbounds(annotations)
         verify_textbounds(textbounds, text)
-        textbounds = eliminate_overlaps(textbounds)
+        textbounds = eliminate_overlaps(textbounds, overlap_rule)
         retag_document(document, textbounds)
 
         return document

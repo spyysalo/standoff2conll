@@ -7,6 +7,10 @@ from common import FormatError
 
 TEXTBOUND_LINE_RE = re.compile(r'^T\d+\t')
 
+KEEP_LONGER = 'keep-longer'
+KEEP_SHORTER = 'keep-shorter',
+OVERLAP_RULES = [KEEP_LONGER, KEEP_SHORTER]
+
 class Textbound(object):
     """Textbound annotation in BioNLP ST/brat format.
 
@@ -97,10 +101,25 @@ def parse_textbounds(input_):
 
     return textbounds
 
-def eliminate_overlaps(textbounds):
-    eliminate = {}
+def select_eliminated_and_kept(t1, t2, overlap_rule=None):
+    if overlap_rule is None:
+        overlap_rule = OVERLAP_RULES[0]    # default
+    if overlap_rule == KEEP_LONGER:
+        if t1.end-t1.start < t2.end-t2.start:
+            return t1, t2
+        else:
+            return t2, t1
+    elif overlap_rule == KEEP_SHORTER:
+        if t1.end-t1.start > t2.end-t2.start:
+            return t1, t2
+        else:
+            return t2, t1
+    else:
+        raise ValueError(overlap_rule)
 
+def eliminate_overlaps(textbounds, overlap_rule=None):
     # TODO: avoid O(n^2) overlap check
+    eliminate = {}
     for t1 in textbounds:
         for t2 in textbounds:
             if t1 is t2:
@@ -109,24 +128,14 @@ def eliminate_overlaps(textbounds):
                 continue
             if eliminate.get(t1) or eliminate.get(t2):
                 continue
-            # eliminate shorter
-            if t1.end-t1.start > t2.end-t2.start:
-                try:
-                    print >> sys.stderr, "Eliminate %s due to overlap with %s"\
-                        % (t2, t1)
-                except UnicodeEncodeError:
-                    print >> sys.stderr, "Eliminate %s due to overlap with %s"\
-                        % (t2.id, t1.id)
-                eliminate[t2] = True
-            else:
-                try:
-                    print >> sys.stderr, "Eliminate %s due to overlap with %s"\
-                        % (t1, t2)
-                except UnicodeEncodeError:
-                    print >> sys.stderr, "Eliminate %s due to overlap with %s"\
-                        % (t1.id, t2.id)
-                eliminate[t1] = True
-
+            elim, keep = select_eliminated_and_kept(t1, t2, overlap_rule)
+            try:
+                print >> sys.stderr, "Eliminate %s due to overlap with %s"\
+                    % (elim, keep)
+            except UnicodeEncodeError:
+                print >> sys.stderr, "Eliminate %s due to overlap with %s"\
+                    % (elim.id, keep.id)
+            eliminate[elim] = True
     return [t for t in textbounds if not t in eliminate]
 
 def verify_textbounds(textbounds, text):

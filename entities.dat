@@ -1,5 +1,6 @@
 # 0080-00FF: Latin-1 Supplement
-# 0080	<control>
+# 0080	<control> (remove)
+0080	
 # 0081	<control>
 # 0082	<BREAK PERMITTED HERE>
 # 0083	<NO BREAK HERE>
@@ -16,14 +17,21 @@
 # 008D	<REVERSE LINE FEED>
 # 008E	<SINGLE SHIFT TWO>
 # 008F	<SINGLE SHIFT THREE>
-# 0090	<DEVICE CONTROL STRING>
-# 0091	<PRIVATE USE ONE>
-# 0092	<PRIVATE USE TWO>
-# 0093	<SET TRANSMIT STATE>
-# 0094	<CANCEL CHARACTER>
+# 0090	<DEVICE CONTROL STRING> (remove)
+0090	
+# 0091	<PRIVATE USE ONE> (misuse as single quote)
+0091	'
+# 0092	<PRIVATE USE TWO> (misuse as single quote)
+0092	'
+# 0093	<SET TRANSMIT STATE> (misuse as double quote)
+0093	"
+# 0094	<CANCEL CHARACTER> (misuse as double quote)
+0094	"
 # 0095	<MESSAGE WAITING>
-# 0096	<START OF GUARDED AREA>
-# 0097	<END OF GUARDED AREA>
+# 0096	<START OF GUARDED AREA> (misuse as dash)
+0096	-
+# 0097	<END OF GUARDED AREA> (misuse as dash)
+0097	-
 # 0098	<START OF STRING>
 # 0099	<control>
 # 009A	<SINGLE CHARACTER INTRODUCER>
@@ -555,6 +563,11 @@
 027E	r
 # 027F	<LATIN SMALL LETTER REVERSED R WITH FISHHOOK>
 # ...
+# 0283	<LATIN SMALL LETTER ESH>
+0283	esh
+# ...
+028A	upsilon
+# ...
 # 02B0-02FF: Spacing Modifier Letters
 02B0	h
 02B1	h
@@ -609,7 +622,7 @@
 02DC	~
 02DD	"
 #02DE	<MODIFIER LETTER RHOTIC HOOK>
-#02DF	<MODIFIER LETTER CROSS ACCENT>
+02DF	x
 02E0	gamma
 02E1	l
 02E2	s
@@ -1022,12 +1035,34 @@
 # 046E	<CYRILLIC CAPITAL LETTER KSI>
 # 046F	<CYRILLIC SMALL LETTER KSI>
 # 0470-04FF TODO
+0472	fita
+# ...
+04D3	a
+04E7	o
+# ...
+049B	k
 # ...
 # 04B0	<CYRILLIC CAPITAL LETTER STRAIGHT U WITH STROKE> (rough approx.)
 04B0	Y
 # ...
 # 04D9	<CYRILLIC SMALL LETTER SCHWA> (rough approx.)
 04D9	e
+# ...
+# 05F3 <HEBREW PUNCTUATION GERESH> (use as single quote)
+05F3	'
+# 05F3 <HEBREW PUNCTUATION GERSHAYIM>
+05F4	"
+# ...
+066B	,
+066C	,
+066D	*
+# ...
+# 115F <HANGUL CHOSEONG FILLER>
+115F	 
+1D27	lamda
+# ...
+# 1D52 <MODIFIER LETTER SMALL O>
+1D52	o
 # ...
 # 1E00-1EFF: Latin Extended Additional
 1E00	A
@@ -1357,8 +1392,8 @@
 203B	*
 203C	!!
 203D	!?
-# 203E	<OVERLINE>
-# 203F	<UNDERTIE>
+203E	-
+203F	_
 # 2040	<CHARACTER TIE>
 # 2041	<CARET INSERTION POINT>
 2041	^
@@ -1660,14 +1695,28 @@
 22A5	_|_
 # ...
 3000	 
+3001	,
+3002	.
 # ...
+3007	0
 3008	<
 3009	>
+300A	<<
+300B	>>
 # ...
+3010	[
+3011	]
 3016	(
 3017	)
 301A	[
 301B	]
+30FB	.
+# ...
+338D	ug
+338E	mg
+3395	ul
+3396	Ml
+339B	um
 # 2100-214F: Letterlike Symbols
 # Mapping for range originally generated in part using NLM LVG toAscii.
 2100	a/c
@@ -1801,6 +1850,8 @@
 # ...
 21A4	<-|
 21A6	|->
+21A9	<-
+21AA	->
 # ...
 #21B0	Lsh
 21B0	<-
@@ -1857,6 +1908,12 @@
 21D3	v
 21D4	<=>
 # ...
+21DA	<=
+21DB	=>
+21DC	<~
+21DD	~>
+# ...
+21E2	->
 21E6	<=
 21E7	^
 21E8	=>
@@ -1911,6 +1968,8 @@
 25EF	O
 25FB	[]
 25FC	*
+25FD	[]
+25FE	*
 # ...
 25A0	*
 25A1	*
@@ -2145,7 +2204,6 @@
 271D	+
 271E	+
 271F	+
-# ...
 2720	*
 2721	*
 2722	*
@@ -2156,14 +2214,24 @@
 2727	*
 2728	*
 2729	*
-# ...
-# 2733	<EIGHT SPOKED ASTERISK>
+272A	*
+272B	*
+272C	*
+272D	*
+272E	*
+272F	*
+2730	*
+2731	*
+2732	*
 2733	*
-# 2736	<SIX POINTED BLACK STAR>
+2734	*
+2735	*
 2736	*
+2737	*
+2738	*
+2739	*
 # ...
-2736	*
-# ...
+274F	[]
 2750	[]
 2751	[]
 2752	[]
@@ -2172,9 +2240,55 @@
 2755	!
 2756	*
 2757	!
-# 27A2	<THREE-D TOP-LIGHTED RIGHTWARDS ARROWHEAD>
+2780	(1)
+2781	(2)
+2782	(3)
+2783	(4)
+2784	(5)
+2785	(6)
+2786	(7)
+2787	(8)
+2788	(9)
+2789	(10)
+278A	(1)
+278B	(2)
+278C	(3)
+278D	(4)
+278E	(5)
+278F	(6)
+2790	(7)
+2791	(8)
+2792	(9)
+2793	(10)
 2794	->
+2795	+
+2796	-
+# 2797	<HEAVY DIVISION SIGN>
+2798	->
+2799	->
+279A	->
+279B	->
+279C	->
+279D	->
+279E	->
+279F	->
+27A0	->
+27A1	->
+# 27A2	<THREE-D TOP-LIGHTED RIGHTWARDS ARROWHEAD>
 27A2	->
+27A3	->
+27A4	->
+27A5	->
+27A6	->
+27A7	->
+27A8	->
+27A9	->
+27AA	->
+27AB	->
+27AC	->
+27AD	->
+27AE	->
+27AF	->
 # 27C0-27EF: Miscellaneous Mathematical Symbols-A (partial)
 27C2	_|_
 27C3	subset
@@ -2259,6 +2373,8 @@
 2467	(8)
 2468	(9)
 2469	(10)
+# ...
+24C7	(R)
 # 2600-26FF: Miscellaneous Symbols (very partial coverage)
 2600	*
 2605	*
@@ -2269,6 +2385,8 @@
 260D	*
 # ...
 2610	[]
+2611	[v]
+2612	[x]
 # ...
 2640	female
 2642	male
@@ -2284,6 +2402,8 @@
 # ...
 266F	#
 # ...
+# E2F6	<not a valid unicode character> (used as equal or greater than)
+E2F6	>=
 F020	 
 FB00	ff
 FB01	fi
@@ -2295,12 +2415,28 @@ FE37	{
 # FE38	<PRESENTATION FORM FOR VERTICAL RIGHT CURLY BRACKET>
 FE38	}
 # ...
+FE5F	#
+# ...
+FE61	*
+# ...
 FEFF	 
 # ...
-FF0C	,
-FF0D	-
 # FF00-FFEF: Halfwidth and Fullwidth Forms
 # ...
+FF01	!
+FF02	"
+FF03	#
+FF04	$
+FF05	%
+FF06	&
+FF07	'
+FF08	(
+FF09	)
+FF0A	*
+FF0B	+
+FF0C	,
+FF0D	-
+FF0E	.
 FF10	0
 FF11	1
 FF12	2
@@ -2317,6 +2453,12 @@ FF1C	<
 FF1D	=
 FF1E	>
 FF1F	?
+# ...
+FF5E	~
+# F8FE <Private Use, Last> (appears to be used for double chemical bond)
+F8FE	=
+# F8FF <Private Use, Last> (appears to be used for single chemical bond)
+F8FF	-
 # 1D400-1D7FF: Mathematical Alphanumeric Symbols
 # Mapping for range originally generated using uni2ascii.
 # 1D6A6- cut due to lack of uni2ascii mapping.

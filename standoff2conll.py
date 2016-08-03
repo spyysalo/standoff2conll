@@ -36,7 +36,7 @@ def argparser():
     return ap
 
 def is_standoff_file(fn):
-    return os.path.splitext(fn)[1] == '.ann'
+    return os.path.splitext(fn)[1] in ('.ann', '.a1')
 
 def txt_for_ann(filename):
     return os.path.splitext(filename)[0]+'.txt'

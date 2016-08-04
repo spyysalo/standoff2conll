@@ -10,7 +10,7 @@ from tagsequence import is_tag, is_start_tag, is_continue_tag, OUT_TAG
 
 # TODO: standoff.py interface should be narrower
 from standoff import Textbound, parse_textbounds, eliminate_overlaps, \
-    verify_textbounds, retag_document
+    verify_textbounds, filter_textbounds, retag_document
 
 # UI identifiers for supported formats
 TEXT_FORMAT = 'text'
@@ -371,7 +371,7 @@ class Document(object):
 
     @classmethod
     def from_standoff(cls, text, annotations, sentence_split=True,
-                      overlap_rule=None):
+                      overlap_rule=None, filter_types=None):
         """Return Document given text and standoff annotations."""
 
         # first create a document from the text without annotations
@@ -381,6 +381,8 @@ class Document(object):
         document = cls.from_text(text, sentence_split)
 
         textbounds = parse_textbounds(annotations)
+        if filter_types:
+            textbounds = filter_textbounds(textbounds, filter_types)
         verify_textbounds(textbounds, text)
         textbounds = eliminate_overlaps(textbounds, overlap_rule)
         retag_document(document, textbounds)

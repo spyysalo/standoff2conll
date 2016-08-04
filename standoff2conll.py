@@ -33,6 +33,8 @@ def argparser():
                     help='rule to apply to resolve overlapping annotations')
     ap.add_argument('-s', '--tagset', choices=TAGSETS, default=None,
                     help='tagset (default %s)' % DEFAULT_TAGSET)
+    ap.add_argument('-t', '--types', nargs='*',
+                    help='filter annotations to given types')
     return ap
 
 def is_standoff_file(fn):
@@ -48,7 +50,8 @@ def read_ann(filename, options, encoding='utf-8'):
             return Document.from_standoff(
                 t_in.read(), a_in.read(),
                 sentence_split = not options.no_sentence_split,
-                overlap_rule = options.overlap_rule
+                overlap_rule = options.overlap_rule,
+                filter_types = options.types
             )
 
 def replace_types_with(document, type_):

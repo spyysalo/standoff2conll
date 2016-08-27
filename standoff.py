@@ -138,9 +138,12 @@ def eliminate_overlaps(textbounds, overlap_rule=None):
             eliminate[elim] = True
     return [t for t in textbounds if not t in eliminate]
 
-def filter_textbounds(textbounds, types):
+def filter_textbounds(textbounds, types, exclude=False):
     """Filter textbounds to given types."""
-    return [t for t in textbounds if t.type in types]
+    if not exclude:
+        return [t for t in textbounds if t.type in types]
+    else:
+        return [t for t in textbounds if t.type not in types]
 
 def verify_textbounds(textbounds, text):
     """Verify that given textbounds are valid with reference to given text.

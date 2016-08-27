@@ -371,7 +371,8 @@ class Document(object):
 
     @classmethod
     def from_standoff(cls, text, annotations, sentence_split=True,
-                      overlap_rule=None, filter_types=None):
+                      overlap_rule=None, filter_types=None,
+                      exclude_types=None):
         """Return Document given text and standoff annotations."""
 
         # first create a document from the text without annotations
@@ -383,6 +384,9 @@ class Document(object):
         textbounds = parse_textbounds(annotations)
         if filter_types:
             textbounds = filter_textbounds(textbounds, filter_types)
+        if exclude_types:
+            textbounds = filter_textbounds(textbounds, exclude_types,
+                                           exclude=True)
         verify_textbounds(textbounds, text)
         textbounds = eliminate_overlaps(textbounds, overlap_rule)
         retag_document(document, textbounds)

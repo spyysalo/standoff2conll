@@ -341,7 +341,8 @@ class Document(object):
             o, prev = 0, None
             for s in split:
                 if any(a for a in annotations if a.start < o and a.end >= o):
-                    warn('rejoin ssplit: {} /// {}'.format(prev, s))
+                    warn('rejoin ssplit: {} /// {}'.format(
+                        prev.encode('utf-8'), s.encode('utf-8')))
                     rejoined[-1] = rejoined[-1] + s
                 else:
                     rejoined.append(s)

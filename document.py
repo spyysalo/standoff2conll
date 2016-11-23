@@ -2,6 +2,8 @@
 
 import re
 
+from logging import warn
+
 from itertools import chain
 from common import pairwise, sentence_to_tokens
 from sentencesplit import text_to_sentences
@@ -323,12 +325,35 @@ class Document(object):
         return len(self.sentences)
 
     @classmethod
-    def from_text(cls, text, sentence_split=True):
-        """Return Document with given text and no annotations."""
+    def from_text(cls, text, sentence_split=True, annotations=None):
+        """Return Document with given text and no annotations.
+
+        If annotations is not None, avoid creating sentence splits
+        that would split given annotations.
+        """
+
+        split = text_to_sentences(text, sentence_split)
+        assert ''.join(split) == text, 'sentence split mismatch'
+
+        if sentence_split and annotations:
+            # Re-join splits that break up annotations (TODO: avoid O(nm))
+            rejoined = []
+            o, prev = 0, None
+            for s in split:
+                if any(a for a in annotations if a.start < o and a.end >= o):
+                    warn('rejoin ssplit: {} /// {}'.format(prev, s))
+                    rejoined[-1] = rejoined[-1] + s
+                else:
+                    rejoined.append(s)
+                o += len(s)
+                prev = s
+            split = rejoined
+            assert ''.join(split) == text, 'sentence rejoin error'
 
         sentences = []
         offset = 0
-        for s in text_to_sentences(text, sentence_split):
+
+        for s in split:
             sentences.append(Sentence.from_text(s, offset))
             offset += len(s)
 
@@ -379,9 +404,10 @@ class Document(object):
         # with all "out" tags (i.e. "O"), then re-tag the tokens based
         # on the textbounds.
 
-        document = cls.from_text(text, sentence_split)
-
         textbounds = parse_textbounds(annotations)
+
+        document = cls.from_text(text, sentence_split, textbounds)
+
         if filter_types:
             textbounds = filter_textbounds(textbounds, filter_types)
         if exclude_types:

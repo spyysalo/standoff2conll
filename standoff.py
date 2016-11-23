@@ -161,20 +161,20 @@ def verify_textbounds(textbounds, text):
             raise FormatError(s.encode('utf-8'))
     return True
 
-def _retag_sentence(sentence, offset_type):
+def _retag_sentence(sentence, offset_ann):
     prev_label = None
     for token in sentence.tokens:
         # TODO: warn for multiple, detailed info for non-initial
         tb = None
         for o in range(token.start, token.end):
-            if o in offset_type:
-                if o != token.start:
+            if o in offset_ann:
+                tb = offset_ann[o]
+                if o != token.start or tb.end < token.end:
                     # TODO: only warn if verbose
                     warn('annotation-token boundary mismatch: "%s" --- "%s"' %
                          (token.text.encode('utf-8'),
-                          offset_type[o].text.encode('utf-8')))
+                          offset_ann[o].text.encode('utf-8')))
                     pass
-                tb = offset_type[o]
                 break
 
         label = None if tb is None else tb.type
@@ -194,13 +194,13 @@ def retag_document(document, textbounds):
     # create a map from offset to annotated type, then iterate over tokens
     # to detect overlaps with textbound annotations to assign tags.
     # TODO: this could be done more neatly/efficiently
-    offset_type = {}
+    offset_ann = {}
 
     for tb in textbounds:
         for i in range(tb.start, tb.end):
-            if i in offset_type:
+            if i in offset_ann:
                 warn('overlapping textbounds')
-            offset_type[i] = tb
+            offset_ann[i] = tb
 
     for sentence in document.sentences:
-        _retag_sentence(sentence, offset_type)
+        _retag_sentence(sentence, offset_ann)

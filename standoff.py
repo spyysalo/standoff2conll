@@ -1,6 +1,8 @@
 import sys
 import re
 
+from logging import warn
+
 from types import StringTypes
 
 from common import FormatError
@@ -167,8 +169,10 @@ def _retag_sentence(sentence, offset_type):
         for o in range(token.start, token.end):
             if o in offset_type:
                 if o != token.start:
-                    # TODO: log if verbose
-                    # print >> sys.stderr, 'Warning: annotation-token boundary mismatch: "%s" --- "%s"' % (token.text, offset_type[o].text)
+                    # TODO: only warn if verbose
+                    warn('annotation-token boundary mismatch: "%s" --- "%s"' %
+                         (token.text.encode('utf-8'),
+                          offset_type[o].text.encode('utf-8')))
                     pass
                 tb = offset_type[o]
                 break
@@ -195,7 +199,7 @@ def retag_document(document, textbounds):
     for tb in textbounds:
         for i in range(tb.start, tb.end):
             if i in offset_type:
-                print >> sys.stderr, "Warning: overlapping textbounds"
+                warn('overlapping textbounds')
             offset_type[i] = tb
 
     for sentence in document.sentences:

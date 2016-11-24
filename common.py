@@ -22,9 +22,11 @@ def split_keep_separator(s, sep='\n'):
 
 # NERsuite tokenization: alnum sequences preserved as single tokens,
 # rest are single-character tokens.
-# single-character token. 
 # TODO: Unicode support
 TOKENIZATION_REGEX = re.compile(r'([0-9a-zA-Z]+|[^0-9a-zA-Z])')
+# Finer-grained tokenization: also split alphabetical from numeric.
+# TODO: allow as option.
+#TOKENIZATION_REGEX = re.compile(r'([0-9]+|[a-zA-Z]+|[^0-9a-zA-Z])')
 
 def sentence_to_tokens(text):
     """Return list of tokens in given sentence using NERsuite tokenization."""

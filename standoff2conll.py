@@ -14,7 +14,8 @@ from asciify import document_to_ascii
 from unicode2ascii import log_missing_ascii_mappings
 from tagsequence import TAGSETS, IO_TAGSET, IOBES_TAGSET, DEFAULT_TAGSET
 from tagsequence import BIO_to_IO, BIO_to_IOBES
-from standoff import OVERLAP_RULES
+from standoff import DISCONT_RULES, OVERLAP_RULES
+
 
 def argparser():
     import argparse
@@ -28,6 +29,9 @@ def argparser():
     ap.add_argument('-n', '--no-sentence-split', default=False,
                     action='store_true',
                     help='do not perform sentence splitting')
+    ap.add_argument('-d', '--discont-rule', choices=DISCONT_RULES,
+                    default=DISCONT_RULES[0],
+                    help='rule to apply to resolve discontinuous annotations')
     ap.add_argument('-o', '--overlap-rule', choices=OVERLAP_RULES,
                     default=OVERLAP_RULES[0],
                     help='rule to apply to resolve overlapping annotations')
@@ -52,6 +56,7 @@ def read_ann(filename, options, encoding='utf-8'):
             return Document.from_standoff(
                 t_in.read(), a_in.read(),
                 sentence_split = not options.no_sentence_split,
+                discont_rule = options.discont_rule,
                 overlap_rule = options.overlap_rule,
                 filter_types = options.types,
                 exclude_types = options.exclude

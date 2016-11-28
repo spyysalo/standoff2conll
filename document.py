@@ -397,15 +397,15 @@ class Document(object):
 
     @classmethod
     def from_standoff(cls, text, annotations, sentence_split=True,
-                      overlap_rule=None, filter_types=None,
-                      exclude_types=None):
+                      discont_rule=None, overlap_rule=None,
+                      filter_types=None, exclude_types=None):
         """Return Document given text and standoff annotations."""
 
         # first create a document from the text without annotations
         # with all "out" tags (i.e. "O"), then re-tag the tokens based
         # on the textbounds.
 
-        textbounds = parse_textbounds(annotations)
+        textbounds = parse_textbounds(annotations, discont_rule)
 
         document = cls.from_text(text, sentence_split, textbounds)
 

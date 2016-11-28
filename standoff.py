@@ -13,6 +13,10 @@ KEEP_LONGER = 'keep-longer'
 KEEP_SHORTER = 'keep-shorter'
 OVERLAP_RULES = [KEEP_LONGER, KEEP_SHORTER]
 
+FULL_SPAN = 'full-span'
+LAST_SPAN = 'last-span'
+DISCONT_RULES = [FULL_SPAN, LAST_SPAN]
+
 class Textbound(object):
     """Textbound annotation in BioNLP ST/brat format.
 
@@ -25,6 +29,7 @@ class Textbound(object):
         self.start = start
         self.end = end
         self.text = text
+        self.skip_validation = False
 
     def __unicode__(self):
         return u'%s\t%s %s %s\t%s' % (self.id, self.type, self.start, self.end,
@@ -56,31 +61,47 @@ class Textbound(object):
         return parsed
 
     @classmethod
-    def _resolve_discontinuous(cls, offsets, text):
+    def _resolve_discontinuous(cls, offsets, text, discont_rule=None):
         # Support for discontinuous annotations is incomplete. Reduce
-        # to continous simply by taking the last (start, end) pair
+        # to continous by given rule.
+        if discont_rule is None:
+            discont_rule = FULL_SPAN
         if len(offsets) == 1:
             return offsets, text
-        last_off = offsets[-1]
-        last_text = text[last_off[0]-last_off[1]:]
-        print >> sys.stderr, 'Resolve discontinuous "%s" to last subspan "%s"' \
+        if discont_rule == FULL_SPAN:
+            first_start = offsets[0][0]
+            last_end = offsets[-1][1]
+            # TODO text
+            return [(first_start, last_end)], text
+        elif discont_rule == LAST_SPAN:
+            last_off = offsets[-1]
+            last_text = text[last_off[0]-last_off[1]:]
+            print >> sys.stderr, 'Resolve discontinuous "%s" to last subspan "%s"' \
             % (text, last_text)
-        return [last_off], last_text
+            return [last_off], last_text
+        else:
+            raise ValueError('unknown rule to resolve discontinuous')
 
     @classmethod
-    def from_str(cls, string):
+    def from_str(cls, string, discont_rule=None):
         try:
             id_, type_offsets, text = string.split('\t')
             type_, offsets = type_offsets.split(' ', 1)
             offsets = cls._parse_offsets(offsets)
+            was_discontinuous = False
             if len(offsets) != 1:
-                offsets, text = cls._resolve_discontinuous(offsets, text)
+                offsets, text = cls._resolve_discontinuous(offsets, text,
+                                                           discont_rule)
+                was_discontinuous = True
             start, end = offsets[0]
-            return cls(id_, type_, start, end, text)
+            ann = cls(id_, type_, start, end, text)
+            ann.skip_validation = (was_discontinuous and
+                                   discont_rule != LAST_SPAN)
+            return ann
         except ValueError, e:
             raise FormatError('Standoff: failed to parse %s' % string)
 
-def parse_textbounds(input_):
+def parse_textbounds(input_, discont_rule=None):
     """Parse textbound annotations in input, returning a list of
     Textbound.
 
@@ -99,7 +120,7 @@ def parse_textbounds(input_):
         if not TEXTBOUND_LINE_RE.search(l):
             continue
 
-        textbounds.append(Textbound.from_str(l))
+        textbounds.append(Textbound.from_str(l, discont_rule))
 
     return textbounds
 
@@ -154,11 +175,18 @@ def verify_textbounds(textbounds, text):
     """
 
     for t in textbounds:
-        try:
-            assert t.is_valid(text)
-        except Exception, e:
-            s = u'Error verifying textbound %s: %s' % (t, e)
-            raise FormatError(s.encode('utf-8'))
+        if t.skip_validation:
+            # TODO fix: hack around the constraint that discontinuous
+            # annotations don't have access to the full text
+            print >> sys.stderr, 'Resolve discontinuous "%s" to full span "%s"'\
+                % (t.text, text[t.start:t.end])
+            t.text = text[t.start:t.end]
+        else:
+            try:
+                assert t.is_valid(text)
+            except Exception, e:
+                s = u'Error verifying textbound %s: %s' % (t, e)
+                raise FormatError(s.encode('utf-8'))
     return True
 
 def _retag_sentence(sentence, offset_ann):

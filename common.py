@@ -1,9 +1,20 @@
 import re
 
+from collections import OrderedDict
 from itertools import chain, tee, izip
 
 class FormatError(Exception):
     pass
+
+
+# TODO: Unicode support
+TOKENIZATION_REGEXS = OrderedDict([
+    # NERsuite-like tokenization: alnum sequences preserved as single
+    # tokens, rest are single-character tokens.
+    ('default', re.compile(r'([0-9a-zA-Z]+|[^0-9a-zA-Z])')),
+    # Finer-grained tokenization: also split alphabetical from numeric.
+    ('fine', re.compile(r'([0-9]+|[a-zA-Z]+|[^0-9a-zA-Z])')),
+])
 
 # adapted from http://docs.python.org/library/itertools.html#recipes
 def pairwise(iterable, include_last=False):
@@ -20,17 +31,11 @@ def split_keep_separator(s, sep='\n'):
     return reduce(lambda acc, elem: acc[:-1] + [acc[-1] + elem] if elem == sep 
                   else acc + [elem], re.split("(%s)" % re.escape(sep), s), [])
 
-# NERsuite tokenization: alnum sequences preserved as single tokens,
-# rest are single-character tokens.
-# TODO: Unicode support
-TOKENIZATION_REGEX = re.compile(r'([0-9a-zA-Z]+|[^0-9a-zA-Z])')
-# Finer-grained tokenization: also split alphabetical from numeric.
-# TODO: allow as option.
-#TOKENIZATION_REGEX = re.compile(r'([0-9]+|[a-zA-Z]+|[^0-9a-zA-Z])')
-
-def sentence_to_tokens(text):
+def sentence_to_tokens(text, tokenization_re=None):
     """Return list of tokens in given sentence using NERsuite tokenization."""
 
-    tok = [t for t in TOKENIZATION_REGEX.split(text) if t]
+    if tokenization_re is None:
+        tokenization_re = TOKENIZATION_REGEXS.get('default')
+    tok = [t for t in tokenization_re.split(text) if t]
     assert ''.join(tok) == text
     return tok

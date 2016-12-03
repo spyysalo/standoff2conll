@@ -15,6 +15,7 @@ from unicode2ascii import log_missing_ascii_mappings
 from tagsequence import TAGSETS, IO_TAGSET, IOBES_TAGSET, DEFAULT_TAGSET
 from tagsequence import BIO_to_IO, BIO_to_IOBES
 from standoff import DISCONT_RULES, OVERLAP_RULES
+from common import TOKENIZATION_REGEXS
 
 
 def argparser():
@@ -36,6 +37,8 @@ def argparser():
                     help='rule to apply to resolve discontinuous annotations')
     ap.add_argument('-i', '--include-docid', default=False, action='store_true',
                     help='include document IDs')
+    ap.add_argument('-k', '--tokenization', choices=TOKENIZATION_REGEXS.keys(),
+                    default=TOKENIZATION_REGEXS.keys()[0], help='tokenization')
     ap.add_argument('-o', '--overlap-rule', choices=OVERLAP_RULES,
                     default=OVERLAP_RULES[0],
                     help='rule to apply to resolve overlapping annotations')
@@ -67,6 +70,7 @@ def read_ann(filename, options, encoding='utf-8'):
                 overlap_rule = options.overlap_rule,
                 filter_types = options.types,
                 exclude_types = options.exclude,
+                tokenization_re = TOKENIZATION_REGEXS.get(options.tokenization),
                 document_id = document_id(filename)
             )
 

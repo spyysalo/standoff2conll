@@ -203,10 +203,10 @@ class Sentence(object):
         return len(self.tokens)
 
     @classmethod
-    def from_text(cls, text, base_offset=0):
+    def from_text(cls, text, base_offset=0, tokenization_re=None):
         tokens = []
         offset = 0
-        for t in sentence_to_tokens(text):
+        for t in sentence_to_tokens(text, tokenization_re):
             if not t.isspace():
                 tokens.append(Token.from_text(t, offset+base_offset))
             offset += len(t)        
@@ -333,7 +333,8 @@ class Document(object):
         return len(self.sentences)
 
     @classmethod
-    def from_text(cls, text, sentence_split=True, annotations=None):
+    def from_text(cls, text, sentence_split=True, annotations=None,
+                  tokenization_re=None):
         """Return Document with given text and no annotations.
 
         If annotations is not None, avoid creating sentence splits
@@ -363,7 +364,9 @@ class Document(object):
         offset = 0
 
         for s in split:
-            sentences.append(Sentence.from_text(s, offset))
+            sentences.append(Sentence.from_text(
+                s, offset, tokenization_re=tokenization_re)
+            )
             offset += len(s)
 
         return cls(text, sentences)
@@ -407,7 +410,7 @@ class Document(object):
     def from_standoff(cls, text, annotations, sentence_split=True,
                       discont_rule=None, overlap_rule=None,
                       filter_types=None, exclude_types=None,
-                      document_id=None):
+                      tokenization_re=None, document_id=None):
         """Return Document given text and standoff annotations."""
 
         # first create a document from the text without annotations
@@ -416,7 +419,8 @@ class Document(object):
 
         textbounds = parse_textbounds(annotations, discont_rule)
 
-        document = cls.from_text(text, sentence_split, textbounds)
+        document = cls.from_text(text, sentence_split, textbounds,
+                                 tokenization_re=tokenization_re)
 
         if document_id is not None:
             document.id = document_id

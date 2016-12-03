@@ -77,9 +77,12 @@ class Token(object):
             [unicode(self.start), unicode(self.end), unicode(text)]
         return '\t'.join(chain(fields, self.fvec))
 
-    def to_conll(self):
+    def to_conll(self, include_offsets=False):
         """Return Token in CoNLL-like format."""
         fields = [unicode(self.text), self.tag]
+        if include_offsets:
+            offsets = [unicode(self.start), unicode(self.end)]
+            fields = fields[:1] + offsets + fields[1:]
         return '\t'.join(chain(fields, self.fvec))
 
     @classmethod
@@ -162,7 +165,7 @@ class Sentence(object):
         return '\n'.join(chain((t.to_nersuite(exclude_tag) 
                                 for t in tokens), ['\n']))
 
-    def to_conll(self, exclude_tag=False):
+    def to_conll(self, include_offsets=False):
         """Return Sentence in CoNLL-like format."""
 
         # empty "sentences" map to nothing
@@ -173,7 +176,8 @@ class Sentence(object):
         tokens = [t for t in self.tokens if t.text and not t.text.isspace()]
         
         # sentences terminated with empty lines
-        return '\n'.join(chain((t.to_conll() for t in tokens), ['\n']))
+        return '\n'.join(chain((t.to_conll(include_offsets) for t in tokens),
+                               ['\n']))
 
     def standoffs(self, index):
         """Return sentence annotations as list of Standoff objects."""
@@ -274,10 +278,10 @@ class Document(object):
 
         return ''.join((s.to_nersuite(exclude_tag) for s in self.sentences))
 
-    def to_conll(self):
+    def to_conll(self, include_offsets=False):
         """Return Document in CoNLL-like format."""
 
-        return ''.join((s.to_conll() for s in self.sentences))
+        return ''.join((s.to_conll(include_offsets) for s in self.sentences))
 
     def to_standoff(self):
         """Return Document annotations in BioNLP ST/brat-flavored

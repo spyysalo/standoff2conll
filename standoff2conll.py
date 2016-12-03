@@ -26,6 +26,8 @@ def argparser():
                     help='replace all annotation types with TYPE')
     ap.add_argument('-a', '--asciify', default=None, action='store_true',
                     help='map input to ASCII')
+    ap.add_argument('-c', '--char-offsets', default=False, action='store_true',
+                    help='include character offsets')
     ap.add_argument('-n', '--no-sentence-split', default=False,
                     action='store_true',
                     help='do not perform sentence splitting')
@@ -97,7 +99,7 @@ def convert_directory(directory, options):
             retag_document(document, options.tagset)
         if options.asciify:
             document_to_ascii(document)
-        conll_data = document.to_conll()
+        conll_data = document.to_conll(include_offsets=options.char_offsets)
         sys.stdout.write(conll_data.encode('utf-8'))
 
 def main(argv):

@@ -34,6 +34,8 @@ def argparser():
     ap.add_argument('-d', '--discont-rule', choices=DISCONT_RULES,
                     default=DISCONT_RULES[0],
                     help='rule to apply to resolve discontinuous annotations')
+    ap.add_argument('-i', '--include-docid', default=False, action='store_true',
+                    help='include document IDs')
     ap.add_argument('-o', '--overlap-rule', choices=OVERLAP_RULES,
                     default=OVERLAP_RULES[0],
                     help='rule to apply to resolve overlapping annotations')
@@ -51,6 +53,9 @@ def is_standoff_file(fn):
 def txt_for_ann(filename):
     return os.path.splitext(filename)[0]+'.txt'
 
+def document_id(filename):
+    return os.path.splitext(os.path.basename(filename))[0]
+
 def read_ann(filename, options, encoding='utf-8'):
     txtfilename = txt_for_ann(filename)
     with codecs.open(txtfilename, 'rU', encoding=encoding) as t_in:
@@ -61,7 +66,8 @@ def read_ann(filename, options, encoding='utf-8'):
                 discont_rule = options.discont_rule,
                 overlap_rule = options.overlap_rule,
                 filter_types = options.types,
-                exclude_types = options.exclude
+                exclude_types = options.exclude,
+                document_id = document_id(filename)
             )
 
 def replace_types_with(document, type_):
@@ -99,7 +105,10 @@ def convert_directory(directory, options):
             retag_document(document, options.tagset)
         if options.asciify:
             document_to_ascii(document)
-        conll_data = document.to_conll(include_offsets=options.char_offsets)
+        conll_data = document.to_conll(
+            include_offsets=options.char_offsets,
+            include_docid=options.include_docid
+        )
         sys.stdout.write(conll_data.encode('utf-8'))
 
 def main(argv):

@@ -278,10 +278,14 @@ class Document(object):
 
         return ''.join((s.to_nersuite(exclude_tag) for s in self.sentences))
 
-    def to_conll(self, include_offsets=False):
+    def to_conll(self, include_offsets=False, include_docid=False):
         """Return Document in CoNLL-like format."""
 
-        return ''.join((s.to_conll(include_offsets) for s in self.sentences))
+        if not include_docid:
+            s = ''
+        else:
+            s = u'# doc_id = %s\n' % self.id
+        return s+''.join((s.to_conll(include_offsets) for s in self.sentences))
 
     def to_standoff(self):
         """Return Document annotations in BioNLP ST/brat-flavored
@@ -402,7 +406,8 @@ class Document(object):
     @classmethod
     def from_standoff(cls, text, annotations, sentence_split=True,
                       discont_rule=None, overlap_rule=None,
-                      filter_types=None, exclude_types=None):
+                      filter_types=None, exclude_types=None,
+                      document_id=None):
         """Return Document given text and standoff annotations."""
 
         # first create a document from the text without annotations
@@ -413,6 +418,8 @@ class Document(object):
 
         document = cls.from_text(text, sentence_split, textbounds)
 
+        if document_id is not None:
+            document.id = document_id
         if filter_types:
             textbounds = filter_textbounds(textbounds, filter_types)
         if exclude_types:

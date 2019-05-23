@@ -14,6 +14,8 @@ TOKENIZATION_REGEXS = OrderedDict([
     ('default', re.compile(r'([0-9a-zA-Z]+|[^0-9a-zA-Z])')),
     # Finer-grained tokenization: also split alphabetical from numeric.
     ('fine', re.compile(r'([0-9]+|[a-zA-Z]+|[^0-9a-zA-Z])')),
+    # Whitespace tokenization
+    ('space', re.compile(r'(\S+)')),
 ])
 
 # adapted from http://docs.python.org/library/itertools.html#recipes

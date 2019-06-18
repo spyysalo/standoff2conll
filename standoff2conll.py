@@ -21,8 +21,7 @@ from common import TOKENIZATION_REGEXS
 def argparser():
     import argparse
     ap = argparse.ArgumentParser(description='Convert standoff to CoNLL format',
-                                 usage='%(prog)s [OPTIONS] DIRECTORY')
-    ap.add_argument('directory')
+                                 usage='%(prog)s [OPTIONS] DIRS/FILES')
     ap.add_argument('-1', '--singletype', default=None, metavar='TYPE',
                     help='replace all annotation types with TYPE')
     ap.add_argument('-a', '--asciify', default=None, action='store_true',
@@ -48,6 +47,7 @@ def argparser():
                     help='filter annotations to given types')
     ap.add_argument('-x', '--exclude', metavar='TYPE', nargs='*',
                     help='exclude annotations of given types')
+    ap.add_argument('data', metavar='DIRS/FILES', nargs='+')
     return ap
 
 def is_standoff_file(fn):
@@ -101,6 +101,9 @@ def convert_directory(directory, options):
         error('No standoff files in {}'.format(directory))
         return
 
+    convert_files(files, options)
+
+def convert_files(files, options):
     for fn in sorted(files):
         document = read_ann(fn, options)
         if options.singletype:
@@ -117,10 +120,14 @@ def convert_directory(directory, options):
 
 def main(argv):
     args = argparser().parse_args(argv[1:])
-    if not os.path.isdir(args.directory):
-        error('Not a directory: {}'.format(args.directory))
-        return 1
-    convert_directory(args.directory, args)
+    files = []
+    for path in args.data:
+        if os.path.isdir(path):
+            convert_directory(path, args)
+        else:
+            files.append(path)
+    if files:
+        convert_files(files, args)
     if args.asciify:
         log_missing_ascii_mappings()
     return 0

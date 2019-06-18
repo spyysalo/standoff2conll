@@ -127,7 +127,19 @@ def parse_textbounds(input_, discont_rule=None):
 def select_eliminated_and_kept(t1, t2, overlap_rule=None):
     if overlap_rule is None:
         overlap_rule = OVERLAP_RULES[0]    # default
-    if overlap_rule == KEEP_LONGER:
+    if (t1.start, t1.end) == (t2.start, t2.end):
+        # Identical span, pick arbitrarily (but consistently) by type
+        if t1.type > t2.type:
+            return t1, t2
+        else:
+            return t2, t1
+    elif t1.end-t1.start == t2.end-t2.start:
+        # Same length, pick by starting position
+        if t1.start > t2.start:
+            return t1, t2
+        else:
+            return t2, t1
+    elif overlap_rule == KEEP_LONGER:
         if t1.end-t1.start < t2.end-t2.start:
             return t1, t2
         else:

@@ -1,7 +1,8 @@
 import re
 
 from collections import OrderedDict
-from itertools import chain, tee, izip
+from itertools import chain, tee
+from functools import reduce
 
 class FormatError(Exception):
     pass
@@ -24,9 +25,9 @@ def pairwise(iterable, include_last=False):
     a, b = tee(iterable)
     next(b, None)
     if not include_last:
-        return izip(a, b)
+        return list(zip(a, b))
     else:
-        return izip(a, chain(b, (None, )))
+        return list(zip(a, chain(b, (None, ))))
 
 # from http://programmaticallyspeaking.com/split-on-separator-but-keep-the-separator-in-python.html
 def split_keep_separator(s, sep='\n'):

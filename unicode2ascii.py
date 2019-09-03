@@ -1,17 +1,15 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # Replaces Unicode characters in input text with ASCII
 # approximations based on file with mappings between the two.
 
-from __future__ import with_statement
 
 import sys
 import os
 import codecs
 import re
 
-from types import StringTypes
-from StringIO import StringIO
+from io import StringIO
 from logging import warn
 
 # The name of the file from which to read the replacement. Each line
@@ -30,7 +28,7 @@ missing_mapping = {}
 # https://github.com/spyysalo/nxml2txt/pull/4.
 def wide_unichr(i):
     try:
-        return unichr(i)
+        return chr(i)
     except ValueError:
         return (r'\U' + hex(i)[2:].zfill(8)).decode('unicode-escape')
 
@@ -80,7 +78,7 @@ def convert_u2a(f, out=None, mapping=None):
     if mapping is None:
         mapping = u2a_mapping
 
-    if isinstance(f, StringTypes):
+    if isinstance(f, str):
         f = StringIO(f)
 
     is_strio = False
@@ -116,22 +114,22 @@ def print_summary(out, mapping):
     if mapping is None:
         mapping = u2a_mapping
 
-    print >> out, "Characters replaced       \t%d" % sum(map_count.values())    
-    sk = map_count.keys()
+    print("Characters replaced       \t%d" % sum(map_count.values()), file=out)
+    sk = list(map_count.keys())
     sk.sort(lambda a,b : cmp(map_count[b],map_count[a]))
     for c in sk:
         try:
-            print >> out, "\t%.4X\t%s\t'%s'\t%d" % (ord(c), c.encode("utf-8"), mapping[c], map_count[c])
+            print("\t%.4X\t%s\t'%s'\t%d" % (ord(c), c.encode("utf-8"), mapping[c], map_count[c]), file=out)
         except:
-            print >> out, "\t%.4X\t'%s'\t%d" % (ord(c), mapping[c], map_count[c])
-    print >> out, "Characters without mapping\t%d" % sum(missing_mapping.values())
-    sk = missing_mapping.keys()
+            print("\t%.4X\t'%s'\t%d" % (ord(c), mapping[c], map_count[c]), file=out)
+    print("Characters without mapping\t%d" % sum(missing_mapping.values()), file=out)
+    sk = list(missing_mapping.keys())
     sk.sort(lambda a,b : cmp(missing_mapping[b],missing_mapping[a]))
     for c in sk:
         try:
-            print >> out, "\t%.4X\t%s\t%d" % (ord(c), c.encode("utf-8"), missing_mapping[c])
+            print("\t%.4X\t%s\t%d" % (ord(c), c.encode("utf-8"), missing_mapping[c]), file=out)
         except:
-            print >> out, "\t%.4X\t?\t%d" % (ord(c), missing_mapping[c])
+            print("\t%.4X\t?\t%d" % (ord(c), missing_mapping[c]), file=out)
 
 def argparser():
     """
@@ -168,7 +166,7 @@ def log_missing_ascii_mappings(write=warn):
         return
     write("Characters without ASCII mapping: %d" %
           sum(missing_mapping.values()))
-    sk = missing_mapping.keys()
+    sk = list(missing_mapping.keys())
     sk.sort(lambda a,b : cmp(missing_mapping[b],missing_mapping[a]))
     for c in sk:
         try:
@@ -183,8 +181,8 @@ def main(argv):
     # read in mapping
     try:
         mapping = read_u2a_data()
-    except IOError, e:
-        print >> sys.stderr, "Error reading mapping from %s: %s" % (MAPPING_FILE_NAME, e)
+    except IOError as e:
+        print("Error reading mapping from %s: %s" % (MAPPING_FILE_NAME, e), file=sys.stderr)
         return 1
 
     # primary processing
@@ -198,8 +196,8 @@ def main(argv):
                     ofn = os.path.join(options.directory, bfn)
                     with codecs.open(ofn, 'wt', encoding="utf-8") as out:
                         convert_u2a(f, out, mapping)
-        except IOError, e:
-            print >> sys.stderr, "Error processing %s: %s" % (fn, e)
+        except IOError as e:
+            print("Error processing %s: %s" % (fn, e), file=sys.stderr)
 
     # optionally print summary of mappings
     if options.verbose:

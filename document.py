@@ -68,20 +68,20 @@ class Token(object):
             # processing seeks to protect against that; see
             # https://github.com/nlplab/nersuite/issues/28
             import sys
-            print >> sys.stderr, 'Warning: truncating very long token (%d characters) for NERsuite' % len(self.text)
+            print('Warning: truncating very long token (%d characters) for NERsuite' % len(self.text), file=sys.stderr)
             text = self.text[:NERSUITE_TOKEN_MAX_LENGTH]
         else:
             text = self.text
 
         fields = ([self.tag] if not exclude_tag else []) + \
-            [unicode(self.start), unicode(self.end), unicode(text)]
+            [str(self.start), str(self.end), str(text)]
         return '\t'.join(chain(fields, self.fvec))
 
     def to_conll(self, include_offsets=False):
         """Return Token in CoNLL-like format."""
-        fields = [unicode(self.text), self.tag]
+        fields = [str(self.text), self.tag]
         if include_offsets:
-            offsets = [unicode(self.start), unicode(self.end)]
+            offsets = [str(self.start), str(self.end)]
             fields = fields[:1] + offsets + fields[1:]
         return '\t'.join(chain(fields, self.fvec))
 
@@ -137,7 +137,7 @@ class Sentence(object):
         relative to sentence beginning; otherwise, they are absolute
         offsets into the document text.
         """
-        
+
         tagged = []
         first = None
         for t, next_t in pairwise(self.tokens, include_last=True):
@@ -162,7 +162,7 @@ class Sentence(object):
         tokens = [t for t in self.tokens if t.text and not t.text.isspace()]
 
         # sentences terminated with empty lines in NERsuite format
-        return '\n'.join(chain((t.to_nersuite(exclude_tag) 
+        return '\n'.join(chain((t.to_nersuite(exclude_tag)
                                 for t in tokens), ['\n']))
 
     def to_conll(self, include_offsets=False):
@@ -174,7 +174,7 @@ class Sentence(object):
 
         # tokens with empty or space-only text are ignored
         tokens = [t for t in self.tokens if t.text and not t.text.isspace()]
-        
+
         # sentences terminated with empty lines
         return '\n'.join(chain((t.to_conll(include_offsets) for t in tokens),
                                ['\n']))
@@ -209,7 +209,7 @@ class Sentence(object):
         for t in sentence_to_tokens(text, tokenization_re):
             if not t.isspace():
                 tokens.append(Token.from_text(t, offset+base_offset))
-            offset += len(t)        
+            offset += len(t)
 
         return cls(text, base_offset, tokens)
 
@@ -284,7 +284,7 @@ class Document(object):
         if not include_docid:
             s = ''
         else:
-            s = u'# doc_id = %s\n' % self.id
+            s = '# doc_id = %s\n' % self.id
         return s+''.join((s.to_conll(include_offsets) for s in self.sentences))
 
     def to_standoff(self):
@@ -292,7 +292,7 @@ class Document(object):
         standoff format."""
 
         standoffs = self.standoffs()
-        return '\n'.join(unicode(s) for s in standoffs)+'\n' if standoffs else ''
+        return '\n'.join(str(s) for s in standoffs)+'\n' if standoffs else ''
 
     def to_bc2gm(self):
         """Return Document annotations in BioCreative 2 Gene Mention
@@ -302,7 +302,7 @@ class Document(object):
         for s in self.sentences:
             tagged = s.get_tagged(relative_offsets=True)
             tagged = [(t[0], t[1], t[2], s.text[t[1]:t[2]]) for t in tagged]
-   
+
             # The BC2GM format ignores space when counting offsets,
             # and is inclusive for the end offset. Create mapping
             # from standard to no-space offsets and remap.
@@ -311,18 +311,18 @@ class Document(object):
             for i, c in enumerate(s.text):
                 if not c.isspace():
                     offset_map[i] = o
-                    o += 1                    
-            tagged = [(t[0], offset_map[t[1]], offset_map[t[2]-1], t[3]) 
+                    o += 1
+            tagged = [(t[0], offset_map[t[1]], offset_map[t[2]-1], t[3])
                       for t in tagged]
 
             for t in tagged:
-                lines.append('%s|%d %d|%s\n' % (self.sentence_id(s), 
+                lines.append('%s|%d %d|%s\n' % (self.sentence_id(s),
                                                 t[1], t[2], t[3]))
 
         return ''.join(lines)
 
     def bc2gm_text(self):
-        return ''.join(['%s %s\n' % (self.sentence_id(s), s.text) 
+        return ''.join(['%s %s\n' % (self.sentence_id(s), s.text)
                         for s in self.sentences])
 
     def sentence_id(self, s):
@@ -434,4 +434,3 @@ class Document(object):
         retag_document(document, textbounds)
 
         return document
-        

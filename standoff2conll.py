@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-from __future__ import print_function
-
 import sys
 import os
 import codecs
@@ -36,8 +34,8 @@ def argparser():
                     help='rule to apply to resolve discontinuous annotations')
     ap.add_argument('-i', '--include-docid', default=False, action='store_true',
                     help='include document IDs')
-    ap.add_argument('-k', '--tokenization', choices=TOKENIZATION_REGEXS.keys(),
-                    default=TOKENIZATION_REGEXS.keys()[0], help='tokenization')
+    ap.add_argument('-k', '--tokenization', choices=list(TOKENIZATION_REGEXS.keys()),
+                    default=list(TOKENIZATION_REGEXS.keys())[0], help='tokenization')
     ap.add_argument('-o', '--overlap-rule', choices=OVERLAP_RULES,
                     default=OVERLAP_RULES[0],
                     help='rule to apply to resolve overlapping annotations')
@@ -116,7 +114,7 @@ def convert_files(files, options):
             include_offsets=options.char_offsets,
             include_docid=options.include_docid
         )
-        sys.stdout.write(conll_data.encode('utf-8'))
+        sys.stdout.write(conll_data)
 
 def main(argv):
     args = argparser().parse_args(argv[1:])

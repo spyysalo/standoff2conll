@@ -3,8 +3,6 @@ import re
 
 from logging import warn
 
-from types import StringTypes
-
 from common import FormatError
 
 TEXTBOUND_LINE_RE = re.compile(r'^T\d+\t')
@@ -32,7 +30,7 @@ class Textbound(object):
         self.skip_validation = False
 
     def __unicode__(self):
-        return u'%s\t%s %s %s\t%s' % (self.id, self.type, self.start, self.end,
+        return '%s\t%s %s %s\t%s' % (self.id, self.type, self.start, self.end,
                                       self.text)
 
     def __str__(self):
@@ -44,7 +42,7 @@ class Textbound(object):
         assert 0 <= self.end <= len(text), 'end not in range'
         assert self.start <= self.end, 'start > end'
         assert text[self.start:self.end] == self.text, \
-            u'text mismatch (check encoding?): %d-%d\n    "%s"\nvs. "%s"' % \
+            'text mismatch (check encoding?): %d-%d\n    "%s"\nvs. "%s"' % \
             (self.start, self.end, text[self.start:self.end], self.text)
         return True
 
@@ -76,8 +74,8 @@ class Textbound(object):
         elif discont_rule == LAST_SPAN:
             last_off = offsets[-1]
             last_text = text[last_off[0]-last_off[1]:]
-            print >> sys.stderr, 'Resolve discontinuous "%s" to last subspan "%s"' \
-            % (text, last_text)
+            print('Resolve discontinuous "%s" to last subspan "%s"' \
+            % (text, last_text), file=sys.stderr)
             return [last_off], last_text
         else:
             raise ValueError('unknown rule to resolve discontinuous')
@@ -98,7 +96,7 @@ class Textbound(object):
             ann.skip_validation = (was_discontinuous and
                                    discont_rule != LAST_SPAN)
             return ann
-        except ValueError, e:
+        except ValueError as e:
             raise FormatError('Standoff: failed to parse %s' % string)
 
 def parse_textbounds(input_, discont_rule=None):
@@ -111,7 +109,7 @@ def parse_textbounds(input_, discont_rule=None):
 
     textbounds = []
 
-    if isinstance(input_, StringTypes):
+    if isinstance(input_, str):
         input_ = input_.split('\n')
 
     for l in input_:
@@ -165,11 +163,11 @@ def eliminate_overlaps(textbounds, overlap_rule=None):
                 continue
             elim, keep = select_eliminated_and_kept(t1, t2, overlap_rule)
             try:
-                print >> sys.stderr, "Eliminate %s due to overlap with %s"\
-                    % (elim, keep)
+                print("Eliminate %s due to overlap with %s"\
+                    % (elim, keep), file=sys.stderr)
             except UnicodeEncodeError:
-                print >> sys.stderr, "Eliminate %s due to overlap with %s"\
-                    % (elim.id, keep.id)
+                print("Eliminate %s due to overlap with %s"\
+                    % (elim.id, keep.id), file=sys.stderr)
             eliminate[elim] = True
     return [t for t in textbounds if not t in eliminate]
 
@@ -190,14 +188,14 @@ def verify_textbounds(textbounds, text):
         if t.skip_validation:
             # TODO fix: hack around the constraint that discontinuous
             # annotations don't have access to the full text
-            print >> sys.stderr, 'Resolve discontinuous "%s" to full span "%s"'\
-                % (t.text, text[t.start:t.end])
+            print('Resolve discontinuous "%s" to full span "%s"'\
+                % (t.text, text[t.start:t.end]), file=sys.stderr)
             t.text = text[t.start:t.end]
         else:
             try:
                 assert t.is_valid(text)
-            except Exception, e:
-                s = u'Error verifying textbound %s: %s' % (t, e)
+            except Exception as e:
+                s = 'Error verifying textbound %s: %s' % (t, e)
                 raise FormatError(s.encode('utf-8'))
     return True
 
@@ -212,8 +210,7 @@ def _retag_sentence(sentence, offset_ann):
                 if o != token.start or tb.end < token.end:
                     # TODO: only warn if verbose
                     warn('annotation-token boundary mismatch: "%s" --- "%s"' %
-                         (token.text.encode('utf-8'),
-                          offset_ann[o].text.encode('utf-8')))
+                         (token.text, offset_ann[o].text))
                     pass
                 break
 

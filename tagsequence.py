@@ -173,7 +173,7 @@ def BIO_indices(blocks, is_bio=is_tag):
         for line in block:
             # Initialize candidates on first non-empty
             if valid is None:
-                valid = range(len(line))
+                valid = list(range(len(line)))
 
             valid = [i for i in valid if i < len(line) and is_bio(line[i])]
 
@@ -199,8 +199,7 @@ def _fix_BIO_index(blocks, index):
             if (prev_tag is None or prev_tag == 'O') and ttag == 'I':
                 if fix_bio_options and fix_bio_options.verbose:
                     # TODO: log instead of stderr
-                    print >> sys.stderr, \
-                        'Rewriting initial "I" -> "B" (%s)' % ttype
+                    print('Rewriting initial "I" -> "B" (%s)' % ttype, file=sys.stderr)
                 line[index] = make_tag('B', ttype)
 
             prev_tag = ttag
@@ -217,8 +216,8 @@ def _fix_BIO_index(blocks, index):
                     # Propagate first type to whole sequence
                     if fix_bio_options and fix_bio_options.verbose:
                         # TODO: log instead of stderr
-                        print >> sys.stderr, 'Rewriting multi-type sequence ' \
-                            'to first type (%s->%s)' % (ttype, prev_type)
+                        print('Rewriting multi-type sequence ' \
+                            'to first type (%s->%s)' % (ttype, prev_type), file=sys.stderr)
                     i = ln
                     while i < len(block):
                         itag, itype = parse_tag(block[i][index])
@@ -233,8 +232,8 @@ def _fix_BIO_index(blocks, index):
                     # Propagate last type to whole sequence
                     if fix_bio_options and fix_bio_options.verbose:
                         # TODO: log instead of stderr
-                        print >> sys.stderr, 'Rewriting multi-type sequence ' \
-                            'to last type (%s->%s)' % (prev_type, ttype)
+                        print('Rewriting multi-type sequence ' \
+                            'to last type (%s->%s)' % (prev_type, ttype), file=sys.stderr)
                     i = ln - 1
                     while i >= 0:
                         itag, itype = parse_tag(block[i][index])
@@ -249,8 +248,8 @@ def _fix_BIO_index(blocks, index):
                     # Split sequence
                     if fix_bio_options and fix_bio_options.verbose:
                         # TODO: log instead of stderr
-                        print >> sys.stderr, 'Rewriting "I" -> "B" to split ' \
-                            'at type switch (%s->%s)' % (prev_type, ttype)
+                        print('Rewriting "I" -> "B" to split ' \
+                            'at type switch (%s->%s)' % (prev_type, ttype), file=sys.stderr)
                     line[index] = make_tag('B', ttype)
 
                 else:
@@ -326,8 +325,8 @@ def process(input, indices=None):
     # Output
     for block in blocks:
         for line in block:
-            print '\t'.join(line)
-        print
+            print('\t'.join(line))
+        print()
 
 def process_file(fn, indices=None):
     with open(fn, 'rU') as f:
@@ -369,7 +368,7 @@ def main(argv=None):
             else:
                 process_file(fn, indices)
         except Exception:            
-            print >> sys.stderr, 'Error processing %s' % fn
+            print('Error processing %s' % fn, file=sys.stderr)
             raise
 
     return 0
@@ -390,6 +389,6 @@ def argparser():
 if __name__ == '__main__':
     try:
         sys.exit(main(sys.argv))
-    except Exception, e:
-        print >> sys.stderr, e
+    except Exception as e:
+        print(e, file=sys.stderr)
         sys.exit(1)

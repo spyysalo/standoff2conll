@@ -12,9 +12,9 @@ class FormatError(Exception):
 TOKENIZATION_REGEXS = OrderedDict([
     # NERsuite-like tokenization: alnum sequences preserved as single
     # tokens, rest are single-character tokens.
-    ('default', re.compile(r'([0-9a-zA-Z]+|[^0-9a-zA-Z])')),
+    ('default', re.compile(r'([^\W_]+|.)')),
     # Finer-grained tokenization: also split alphabetical from numeric.
-    ('fine', re.compile(r'([0-9]+|[a-zA-Z]+|[^0-9a-zA-Z])')),
+    ('fine', re.compile(r'([0-9]+|[^\W0-9_]+|.)')),
     # Whitespace tokenization
     ('space', re.compile(r'(\S+)')),
 ])

@@ -56,6 +56,11 @@ class Textbound(object):
         for start_end in offsets.split(';'):
             start, end = start_end.split(' ')
             parsed.append((int(start), int(end)))
+        ordered = sorted(parsed, key=lambda s: s[0])
+        if parsed != ordered:
+            warn('using ordered spans {} instead of source {}'.format(
+                ordered, parsed))
+            parsed = ordered
         return parsed
 
     @classmethod
